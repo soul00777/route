@@ -3,17 +3,17 @@
 #include "fix_math.h"
 #include <iostream>
 
-int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
+int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 {
-	int factor = ipow(2, n); //factor = 2^n
-	int divCons = NUM_B / factor;
+	size_t factor = ipow(2, n); //factor = 2^n
+	size_t divCons = NUM_B / factor;
 
-	for (int i = 0; i < layerIN._length; ++i)
+	for (int i = 0; i < layerIN.size(); ++i)
 		std::cout << layerIN[i] << " ";
 
 	std::cout << std::endl;
 
-	for (int i = 0; i < layerIN._length; ++i)
+	for (int i = 0; i < layerIN.size(); ++i)
 		std::cout << layerOUT[i] << " ";
 
 	std::cout << std::endl;
@@ -21,20 +21,21 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 	std::cout << "factor: " << factor << std::endl;
 	std::cout << "divCons: " << divCons << std::endl;
 
-	Array new_layerIN(NUM_B), new_layerOUT(NUM_B);
-	Array new_input(NUM_B), new_output(NUM_B);
+	std::vector<int> new_layerIN(NUM_B), new_layerOUT(NUM_B);
+	std::vector<int> new_input(NUM_B), new_output(NUM_B);
 
-	for (int t = 0; t < factor; ++t)
+	for (size_t t = 0; t < factor; ++t)
 	{
 		Matrix2d table(NUM_B / (2 * factor), NUM_B / (2 * factor));
 		Matrix2d AorB(NUM_B / (2 * factor), NUM_B / (2 * factor));
+		std::vector<int> A_list(NUM_B, -1), B_list(NUM_B, -1);
 
 		for (int j = 0; j < NUM_B / factor; ++j)
 		{
 			int offset1 = t * (NUM_B / (2 * factor));
 			int offset2 = t * divCons;
 			int row = (find(layerIN, layerIN[j + offset2]) / 2) - offset1;
-			int pair = a_output[find(a_input, layerIN[j + offset2])];
+			int pair = output[find(input, layerIN[j + offset2])];
 			int col = (find(layerOUT, pair) / 2) - offset1;
 			int b1 = find(layerIN, layerIN[j + offset2]) % 2;
 			int b0 = find(layerOUT, pair) % 2;
@@ -60,55 +61,84 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 		}
 		//////////////////////
 
-		for (int i = 0; i < NUM_B / (2 * factor); ++i)
+		for (size_t i = 0; i < NUM_B / (2 * factor); ++i)
 		{
-			int state = 0, n0 = 0, n1 = 0, x0 = 0, x1 = 0, y0 = 0, y1 = 0;
-			for (int j = 0; j < NUM_B / (2 * factor); ++j)
-			{
-				if (table.get(j, i) != -1)
-				{
-					if (state == 0)
-					{
-						n0 = table.get(j, i);
-						x0 = j;
-						y0 = i;
-						state = 1;
-					}
-					else if (state == 1)
-					{
-						n1 = table.get(j, i);
-						x1 = j;
-						y1 = i;
-						state = 2;
-					}
-				}
+			size_t offset1 = t * (NUM_B / (2 * factor));
+			size_t offset2 = t * divCons;
 
-				if (j == (NUM_B / (2 * factor) - 1))
+			int row1 = (find(layerIN, layerIN[2 * i + offset2]) / 2) - offset1;
+			int pair1 = output[find(input, layerIN[2 * i + offset2])];
+			int col1 = (find(layerOUT, pair1) / 2) - offset1;
+			int row2 = (find(layerIN, layerIN[2 * i + 1 + offset2]) / 2) - offset1;
+			int pair2 = output[find(input, layerIN[2 * i + 1 + offset2])];
+			int col2 = (find(layerOUT, pair2) / 2) - offset1;
+			AorB.set(row1, col1, 0);
+			AorB.set(row2, col2, 1);
+			A_list[i] = col1;
+			B_list[i] = col2;
+			for (size_t j = 0; j < i; ++j)
+			{
+				if (col1 == A_list[j] || col2 == B_list[j])
 				{
-					if (state == 2)
-					{
-						if (n0 > n1)
-						{
-							AorB.set(x0, y0, 1);
-							AorB.set(x1, y1, 0);
-						}
-						else
-						{
-							AorB.set(x0, y0, 0);
-							AorB.set(x1, y1, 1);
-						}
-					}
-					else if (state == 1)
-					{
-						AorB.set(x0, y0, 0);
-					}
-					else
-					{
-						printf("\nfuck that shit\n");
-					}
+					AorB.set(row1, col1, 1);
+					AorB.set(row2, col2, 0);
+					A_list[i] = col2;
+					B_list[i] = col1;
+					break;
 				}
 			}
 		}
+
+
+	//	for (int i = 0; i < NUM_B / (2 * factor); ++i)
+	//	{
+	//		int state = 0, n0 = 0, n1 = 0, x0 = 0, x1 = 0, y0 = 0, y1 = 0;
+	//		for (int j = 0; j < NUM_B / (2 * factor); ++j)
+	//		{
+	//			if (table.get(j, i) != -1)
+	//			{
+	//				if (state == 0)
+	//				{
+	//					n0 = table.get(j, i);
+	//					x0 = j;
+	//					y0 = i;
+	//					state = 1;
+	//				}
+	//				else if (state == 1)
+	//				{
+	//					n1 = table.get(j, i);
+	//					x1 = j;
+	//					y1 = i;
+	//					state = 2;
+	//				}
+	//			}
+
+	//			if (j == (NUM_B / (2 * factor) - 1))
+	//			{
+	//				if (state == 2)
+	//				{
+	//					if (n0 > n1)
+	//					{
+	//						AorB.set(x0, y0, 1);
+	//						AorB.set(x1, y1, 0);
+	//					}
+	//					else
+	//					{
+	//						AorB.set(x0, y0, 0);
+	//						AorB.set(x1, y1, 1);
+	//					}
+	//				}
+	//				else if (state == 1)
+	//				{
+	//					AorB.set(x0, y0, 0);
+	//				}
+	//				else
+	//				{
+	//					printf("\nfuck that shit\n");
+	//				}
+	//			}
+	//		}
+	//	}
 
 		//debug/////////////////
 		printf("AorB table: \n");
@@ -135,7 +165,7 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 			int offset = t * (NUM_B / factor);
 			int offset2 = t * (NUM_B / (2 * factor));
 			int row = i;
-			int pair = a_output[find(a_input, layerIN[2 * i + offset])];
+			int pair = output[find(input, layerIN[2 * i + offset])];
 			int col = (find(layerOUT, pair) - offset) / 2;
 			int b1 = find(layerIN, layerIN[2 * i + offset]) % 2;
 			int b0 = find(layerOUT, pair) % 2;
@@ -187,7 +217,7 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 			int offset = t * (NUM_B / factor);
 			int offset2 = t * (NUM_B / (2 * factor));
 			int col = i;
-			int pair = a_input[find(a_output, layerOUT[2 * i + offset])];
+			int pair = input[find(output, layerOUT[2 * i + offset])];
 			int row = (find(layerIN, pair) - offset) / 2;
 			int b1 = find(layerIN, pair) % 2;
 			int b0 = find(layerOUT, layerOUT[2 * i + offset]) % 2;
@@ -263,15 +293,15 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 	for (int i = 0; i < NUM_B; ++i)
 	{
 		int temp = new_input[i];
-		new_layerIN[connection.get(n, i)] = temp;
+		new_layerIN[fix_connection.get(n, i)] = temp;
 		temp = new_output[i];
-		new_layerOUT[connection.get(n, i)] = temp;
+		new_layerOUT[fix_connection.get(n, i)] = temp;
 	}
 
-	printf("\nnew input: \n");
+	printf("\nnew inputs: \n");
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerIN[i] << " ";
-	printf("\nnew output: \n");
+	printf("\nnew outputs: \n");
 
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerOUT[i] << " ";
@@ -279,10 +309,10 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 
 	if (n + 1 == (WIDTH - 1) / 2)
 	{
-		Array last_layerIN(NUM_B);
+		std::vector<int> last_layerIN(NUM_B, -1);
 		for (int i = 0; i < NUM_B / 2; ++i)
 		{
-			int pair = a_output[find(a_input, new_layerIN[2 * i])];
+			int pair = output[find(input, new_layerIN[2 * i])];
 			if (pair == new_layerOUT[2 * i])
 			{
 				conf[i][n + 1] = 0;
@@ -330,5 +360,5 @@ int  division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int n)
 		return 0;
 	}
 	else
-		division_algo(connection, new_layerIN, new_layerOUT, n + 1);
+		division_algo(new_layerIN, new_layerOUT, n + 1);
 }

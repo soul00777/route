@@ -7,8 +7,7 @@
 int main()
 {
 	init_conf();
-	Matrix2d fix_con;
-	fix_con.init_fix_connection();
+	fix_connection.init_fix_connection();
 	printf("Input/Output\n");
 	for (int i = 0; i < NUM_B; ++i)
 		printf("%d ", input[i]);
@@ -17,24 +16,24 @@ int main()
 		printf("%d ", output[i]);
 	printf("\n");
 
-	printf("height: %zu\n", fix_con._height);
-	printf("width: %zu\n", fix_con._width);
+	printf("height: %zu\n", fix_connection._height);
+	printf("width: %zu\n", fix_connection._width);
 	printf("HEIGHT: %d\n", HEIGHT);
 	printf("WIDTH: %d\n", WIDTH);
 
 	for (int i = 0; i < NUM_B; ++i)
 	{
-		printf("%d, ", fix_con.get(0, i));
+		printf("%d, ", fix_connection.get(0, i));
 	}
 	printf("\n");
 	for (int i = 0; i < NUM_B; ++i)
 	{
-		printf("%d, ", fix_con.get(1, i));
+		printf("%d, ", fix_connection.get(1, i));
 	}
 	printf("\n");
 	printf("\n");
 
-	division_algo(fix_con, a_input, a_input, 0);
+	division_algo(input, input, 0);
 	//for (int i = 0; i < NUM_B; ++i)
 	//{
 	//	printf("%d, ", fix_con.get(2, i));

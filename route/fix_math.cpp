@@ -1,20 +1,20 @@
 #include "fix_math.h"
 #include "global.h"
-#include <stdio.h>
+#include <iostream>
 
-int find(Array arr, int key)
-{
-	int index = -1;
-	for (int i = 0; i < arr._length; i++)
-	{
-		if (arr[i] == key)
-		{
-			index = i;
-			break;
-		}
-	}
-	return index;
-}
+//int find(Array arr, int key)
+//{
+//	int index = -1;
+//	for (int i = 0; i < arr._length; i++)
+//	{
+//		if (arr[i] == key)
+//		{
+//			index = i;
+//			break;
+//		}
+//	}
+//	return index;
+//}
 
 Matrix2d::Matrix2d()
 {
@@ -23,7 +23,7 @@ Matrix2d::Matrix2d()
 	_arr = nullptr;
 }
 
-Matrix2d::Matrix2d(int x, int y)
+Matrix2d::Matrix2d(size_t x, size_t y)
 {
 	_height = x;
 	_width = y;
@@ -35,6 +35,7 @@ Matrix2d::Matrix2d(int x, int y)
 Matrix2d::~Matrix2d()
 {
 	delete[] _arr;
+	std::cout << std::endl << "Matrix2d destroyed" << std::endl;
 }
 
 void Matrix2d::set(int x, int y, int val)
@@ -85,6 +86,20 @@ void Matrix2d::init_fix_connection()
 	}
 }
 
+size_t find(std::vector<int> arr, int key)
+{
+	size_t index = 0;
+	for (int i = 0; i < arr.size(); i++)
+	{
+		if (arr[i] == key)
+		{
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
 int ipow(int base, int exp)
 {
 	int result = 1;
@@ -108,29 +123,29 @@ int log2(int i)
 		return cnt;
 }
 
-Array::Array()
-{
-	_length = 0;
-	_arr = nullptr;
-}
-
-Array::Array(int x)
-{
-	_length = x;
-	_arr = new int[_length];
-	for (int i = 0; i < x; ++i)
-		_arr[i] = -1;
-}
-
-//Array::~Array()
+//Array::Array()
 //{
-//	delete[] _arr;
+//	_length = 0;
+//	_arr = nullptr;
 //}
-
-void Array::set_length(int x)
-{
-	_length = x;
-	_arr = new int[_length];
-	for (int i = 0; i < x; ++i)
-		_arr[i] = -1;
-}
+//
+//Array::Array(int x)
+//{
+//	_length = x;
+//	_arr = new int[_length];
+//	for (int i = 0; i < x; ++i)
+//		_arr[i] = -1;
+//}
+//
+////Array::~Array()
+////{
+////	delete[] _arr;
+////}
+//
+//void Array::set_length(int x)
+//{
+//	_length = x;
+//	_arr = new int[_length];
+//	for (int i = 0; i < x; ++i)
+//		_arr[i] = -1;
+//}

@@ -1,4 +1,5 @@
 #pragma once
 #include "fix_math.h"
+#include <vector>
 
-int division_algo(Matrix2d connection, Array layerIN, Array layerOUT, int iter);
+int division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int iter);
