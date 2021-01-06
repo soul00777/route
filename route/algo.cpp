@@ -148,57 +148,6 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 		}
 
-
-	//	for (int i = 0; i < NUM_B / (2 * factor); ++i)
-	//	{
-	//		int state = 0, n0 = 0, n1 = 0, x0 = 0, x1 = 0, y0 = 0, y1 = 0;
-	//		for (int j = 0; j < NUM_B / (2 * factor); ++j)
-	//		{
-	//			if (table.get(j, i) != -1)
-	//			{
-	//				if (state == 0)
-	//				{
-	//					n0 = table.get(j, i);
-	//					x0 = j;
-	//					y0 = i;
-	//					state = 1;
-	//				}
-	//				else if (state == 1)
-	//				{
-	//					n1 = table.get(j, i);
-	//					x1 = j;
-	//					y1 = i;
-	//					state = 2;
-	//				}
-	//			}
-
-	//			if (j == (NUM_B / (2 * factor) - 1))
-	//			{
-	//				if (state == 2)
-	//				{
-	//					if (n0 > n1)
-	//					{
-	//						AorB.set(x0, y0, 1);
-	//						AorB.set(x1, y1, 0);
-	//					}
-	//					else
-	//					{
-	//						AorB.set(x0, y0, 0);
-	//						AorB.set(x1, y1, 1);
-	//					}
-	//				}
-	//				else if (state == 1)
-	//				{
-	//					AorB.set(x0, y0, 0);
-	//				}
-	//				else
-	//				{
-	//					printf("\nfuck that shit\n");
-	//				}
-	//			}
-	//		}
-	//	}
-
 		//debug/////////////////
 		printf("AorB table: \n");
 		for (int i = 0; i < NUM_B / (2 * factor); ++i)
