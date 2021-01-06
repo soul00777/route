@@ -2,24 +2,24 @@
 #include "global.h"
 #include "fix_math.h"
 #include <iostream>
+#include <iomanip>
 
 int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 {
 	size_t factor = ipow(2, n); //factor = 2^n
 	size_t divCons = NUM_B / factor;
 
+	//debug use only//////////
+	std::cout << "LayerIN & LayerOUT" << std::endl;
 	for (int i = 0; i < layerIN.size(); ++i)
-		std::cout << layerIN[i] << " ";
-
+		std::cout << std::setw(2) << layerIN[i] << " ";
 	std::cout << std::endl;
-
 	for (int i = 0; i < layerIN.size(); ++i)
-		std::cout << layerOUT[i] << " ";
-
+		std::cout << std::setw(2) << layerOUT[i] << " ";
 	std::cout << std::endl;
-
 	std::cout << "factor: " << factor << std::endl;
 	std::cout << "divCons: " << divCons << std::endl;
+	//////////////////////////
 
 	std::vector<int> new_layerIN(NUM_B), new_layerOUT(NUM_B);
 	std::vector<int> new_input(NUM_B), new_output(NUM_B);
@@ -45,26 +45,27 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		}
 
 		//debug use only//////////
-		for (int i = 0; i < NUM_B / (2 * factor); ++i)
-		{
-			for (int j = 0; j < NUM_B / (2 * factor); ++j)
-			{
-				if (j == (NUM_B / (2 * factor)) - 1)
-				{
-					printf("%3d\n", table.get(i, j));
-				}
-				else
-				{
-					printf("%3d", table.get(i, j));
-				}
-			}
-		}
+		//for (int i = 0; i < NUM_B / (2 * factor); ++i)
+		//{
+		//	for (int j = 0; j < NUM_B / (2 * factor); ++j)
+		//	{
+		//		if (j == (NUM_B / (2 * factor)) - 1)
+		//		{
+		//			printf("%3d\n", table.get(i, j));
+		//		}
+		//		else
+		//		{
+		//			printf("%3d", table.get(i, j));
+		//		}
+		//	}
+		//}
 		//////////////////////
 
 		for (size_t i = 0; i < NUM_B / (2 * factor); ++i)
 		{
 			size_t offset1 = t * (NUM_B / (2 * factor));
 			size_t offset2 = t * divCons;
+			int j_break_flag = 0;
 
 			int row1 = (find(layerIN, layerIN[2 * i + offset2]) / 2) - offset1;
 			int pair1 = output[find(input, layerIN[2 * i + offset2])];
@@ -78,14 +79,72 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			B_list[i] = col2;
 			for (size_t j = 0; j < i; ++j)
 			{
-				if (col1 == A_list[j] || col2 == B_list[j])
+				if (col1 == A_list[j]) //single conflict
 				{
 					AorB.set(row1, col1, 1);
 					AorB.set(row2, col2, 0);
 					A_list[i] = col2;
 					B_list[i] = col1;
-					break;
+					for (size_t k = 0; k < i; ++k)
+					{
+						if (col2 == A_list[k]) //double conflict, k = previous conflicted row
+						{
+							for (int x = 0; x < NUM_B / (2 * factor); ++x)
+							{
+								if (AorB.get(k, x) == 0)
+								{
+									AorB.set(k, x, 1);
+									B_list[k] = x;
+								}
+								else if (AorB.get(k, x) == 1)
+								{
+									AorB.set(k, x, 0);
+									A_list[k] = x;
+								}
+							}
+							//previous case exchanged
+							//need exit j loop, go back to last row (i)
+							--i;
+							j_break_flag == 1;
+							break; //exit k loop
+						}
+					}
 				}
+
+				if (col2 == B_list[j] && j_break_flag == 0) //single conflict
+				{
+					AorB.set(row1, col1, 1);
+					AorB.set(row2, col2, 0);
+					A_list[i] = col2;
+					B_list[i] = col1;
+					for (size_t k = 0; k < i; ++k)
+					{
+						if (col1 == B_list[k]) //double conflict, k = previous conflicted row
+						{
+							for (int x = 0; x < NUM_B / (2 * factor); ++x)
+							{
+								if (AorB.get(k, x) == 0)
+								{
+									AorB.set(k, x, 1);
+									B_list[k] = x;
+								}
+								else if (AorB.get(k, x) == 1)
+								{
+									AorB.set(k, x, 0);
+									A_list[k] = x;
+								}
+							}
+							//previous case exchanged
+							//need exit j loop, go back to last row (i)
+							--i;
+							j_break_flag = 1;
+							break; //exit k loop
+						}
+					}
+				}
+
+				if (j_break_flag == 1)
+					break; //exit j loop
 			}
 		}
 
@@ -156,7 +215,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 				}
 			}
 		}
-		printf("\n\n");
+		printf("\n");
 		//debug/////////////////
 
 		//setup input conf
@@ -264,7 +323,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		}
 
 		//debug///////////////////
-		printf("\nconf table: \n\n");
+		printf("conf table\n");
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
 			{
@@ -278,11 +337,11 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 				}
 			}
 
-		printf("\nnew input:\n");
+		printf("\nnew intermediate layer input:\n");
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << new_input[i] << " ";
 
-		printf("\nnew output:\n");
+		printf("\nnew intermediate layer output:\n");
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << new_output[i] << " ";
 
@@ -298,10 +357,10 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		new_layerOUT[fix_connection.get(n, i)] = temp;
 	}
 
-	printf("\nnew inputs: \n");
+	printf("\nnew final layer inputs: \n");
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerIN[i] << " ";
-	printf("\nnew outputs: \n");
+	printf("\nnew final layer outputs: \n");
 
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerOUT[i] << " ";
@@ -332,12 +391,12 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		}
 
 		//debug/////
-		printf("final conf table: \n\n");
+		printf("final conf table: \n");
 
-		for (int i = 0; i < 4; ++i)
-			for (int j = 0; j < 5; ++j)
+		for (int i = 0; i < HEIGHT; ++i)
+			for (int j = 0; j < WIDTH; ++j)
 			{
-				if (j == 4)
+				if (j == WIDTH-1)
 				{
 					printf("%d\n", conf[i][j]);
 				}
@@ -348,13 +407,13 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 
 		printf("\n\n");
-		printf("\nfinal input: \n");
+		printf("final input (middle layer): \n");
 		for (int i = 0; i < NUM_B; ++i)
-			std::cout << last_layerIN[i] << " ";
-		printf("\nfinal output: \n");
+			std::cout << std::setw(2) << last_layerIN[i] << " ";
+		printf("\nfinal output (middle layer): \n");
 
 		for (int i = 0; i < NUM_B; ++i)
-			std::cout << new_layerOUT[i] << " ";
+			std::cout << std::setw(2) << new_layerOUT[i] << " ";
 		printf("\n\n");
 
 		return 0;

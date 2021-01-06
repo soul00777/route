@@ -20,22 +20,19 @@ Matrix2d::Matrix2d()
 {
 	_height = 0;
 	_width = 0;
-	_arr = nullptr;
+	_arr.resize(0);
 }
 
 Matrix2d::Matrix2d(size_t x, size_t y)
 {
 	_height = x;
 	_width = y;
-	_arr = new int[_width * _height];
-	for (int i = 0; i < x * y; ++i)
-		_arr[i] = -1;
+	_arr.resize(_height * _width, -1);
 }
 
 Matrix2d::~Matrix2d()
 {
-	delete[] _arr;
-	std::cout << std::endl << "Matrix2d destroyed" << std::endl;
+	_arr.~vector();
 }
 
 void Matrix2d::set(int x, int y, int val)
@@ -54,7 +51,7 @@ void Matrix2d::init_fix_connection()
 	int y = NUM_B;
 	_height = x;
 	_width = y;
-	_arr = new int[_height * _width];
+	_arr.resize(_height * _width);
 
 	int even_cnt = 0;
 	int odd_cnt = NUM_B / 2;
@@ -67,12 +64,14 @@ void Matrix2d::init_fix_connection()
 			{
 				if (pos % 2 == 0)
 				{
-					this->set(i, pos, even_cnt + (y / ipow(2, i) * j));
+					_arr[index(i, pos)] = even_cnt + (y / ipow(2, i) * j);
+					//this->set(i, pos, even_cnt + (y / ipow(2, i) * j));
 					even_cnt++;
 				}
 				else
 				{
-					this->set(i, pos, odd_cnt + (y / ipow(2, i) * j));
+					_arr[index(i, pos)] = odd_cnt + (y / ipow(2, i) * j);
+					//this->set(i, pos, odd_cnt + (y / ipow(2, i) * j));
 					odd_cnt++;
 				}
 				++pos;

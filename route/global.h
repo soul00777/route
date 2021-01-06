@@ -2,7 +2,7 @@
 #include "fix_math.h"
 #include <vector>
 
-extern constexpr size_t NUM_B = 8;
+extern constexpr size_t NUM_B = 16;
 constexpr size_t log2c(int i)
 {
 	size_t cnt = 0;

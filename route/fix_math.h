@@ -6,8 +6,9 @@ class Matrix2d
 public:
 	size_t _height = 0;
 	size_t _width = 0;
-	int* _arr = new int[_width * _height];
-	int index(int x, int y) { return (int)(x * _width + y); }
+	//int* _arr = new int[_width * _height];
+	std::vector<int> _arr;
+	size_t index(size_t x, size_t y) { return (size_t)(x * _width + y); }
 	Matrix2d();
 	Matrix2d(size_t x, size_t y);
 	~Matrix2d();
