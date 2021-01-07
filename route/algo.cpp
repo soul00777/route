@@ -105,7 +105,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 							//previous case exchanged
 							//need exit j loop, go back to last row (i)
 							i = k;
-							j_break_flag == 1;
+							j_break_flag = 1;
 							break; //exit k loop
 						}
 					}

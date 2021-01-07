@@ -47,15 +47,15 @@ int Matrix2d::get(int x, int y)
 
 void Matrix2d::init_fix_connection()
 {
-	int x = (WIDTH - 1) / 2;
-	int y = NUM_B;
+	size_t x = (WIDTH - 1) / 2;
+	size_t y = NUM_B;
 	_height = x;
 	_width = y;
 	_arr.resize(_height * _width);
 
 	int even_cnt = 0;
 	int odd_cnt = NUM_B / 2;
-	int pos = 0;
+	size_t pos = 0;
 	for (int i = 0; i < x; ++i)
 	{
 		for (int j = 0; j < ipow(2, i); ++j)
