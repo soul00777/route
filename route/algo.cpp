@@ -3,13 +3,15 @@
 #include "fix_math.h"
 #include <iostream>
 #include <iomanip>
+//#define DEBUG
+//#define RELEASE
 
 int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 {
 	size_t factor = ipow(2, n); //factor = 2^n
 	size_t divCons = NUM_B / factor;
 
-	//debug use only//////////
+#ifdef DEBUG
 	std::cout << "LayerIN & LayerOUT" << std::endl;
 	for (int i = 0; i < layerIN.size(); ++i)
 		std::cout << std::setw(2) << layerIN[i] << " ";
@@ -19,7 +21,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 	std::cout << std::endl;
 	std::cout << "factor: " << factor << std::endl;
 	std::cout << "divCons: " << divCons << std::endl;
-	//////////////////////////
+#endif
 
 	std::vector<int> new_layerIN(NUM_B), new_layerOUT(NUM_B);
 	std::vector<int> new_input(NUM_B), new_output(NUM_B);
@@ -30,37 +32,6 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		Matrix2d AorB(NUM_B / (2 * factor), NUM_B / (2 * factor));
 		std::vector<int> A_list(NUM_B, -1), B_list(NUM_B, -1);
 
-		for (int j = 0; j < NUM_B / factor; ++j)
-		{
-			int offset1 = t * (NUM_B / (2 * factor));
-			int offset2 = t * divCons;
-			int row = (find(layerIN, layerIN[j + offset2]) / 2) - offset1;
-			int pair = output[find(input, layerIN[j + offset2])];
-			int col = (find(layerOUT, pair) / 2) - offset1;
-			int b1 = find(layerIN, layerIN[j + offset2]) % 2;
-			int b0 = find(layerOUT, pair) % 2;
-			int bin = (b1 << 1) + b0;
-
-			table.set(row, col, bin);
-		}
-
-		//debug use only//////////
-		//for (int i = 0; i < NUM_B / (2 * factor); ++i)
-		//{
-		//	for (int j = 0; j < NUM_B / (2 * factor); ++j)
-		//	{
-		//		if (j == (NUM_B / (2 * factor)) - 1)
-		//		{
-		//			printf("%3d\n", table.get(i, j));
-		//		}
-		//		else
-		//		{
-		//			printf("%3d", table.get(i, j));
-		//		}
-		//	}
-		//}
-		//////////////////////
-
 		for (size_t i = 0; i < NUM_B / (2 * factor); ++i)
 		{
 			size_t offset1 = t * (NUM_B / (2 * factor));
@@ -70,9 +41,13 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			int row1 = (find(layerIN, layerIN[2 * i + offset2]) / 2) - offset1;
 			int pair1 = output[find(input, layerIN[2 * i + offset2])];
 			int col1 = (find(layerOUT, pair1) / 2) - offset1;
+			table.set(row1, col1, layerIN[2 * i + offset2]);
+
 			int row2 = (find(layerIN, layerIN[2 * i + 1 + offset2]) / 2) - offset1;
 			int pair2 = output[find(input, layerIN[2 * i + 1 + offset2])];
 			int col2 = (find(layerOUT, pair2) / 2) - offset1;
+			table.set(row2, col2, layerIN[2 * i + 1 + offset2]);
+
 			AorB.set(row1, col1, 0);
 			AorB.set(row2, col2, 1);
 			A_list[i] = col1;
@@ -148,7 +123,21 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 		}
 
-		//debug/////////////////
+#ifdef DEBUG
+		for (int i = 0; i < NUM_B / (2 * factor); ++i)
+		{
+			for (int j = 0; j < NUM_B / (2 * factor); ++j)
+			{
+				if (j == (NUM_B / (2 * factor)) - 1)
+				{
+					printf("%3d\n", table.get(i, j));
+				}
+				else
+				{
+					printf("%3d", table.get(i, j));
+				}
+			}
+		}
 		printf("AorB table: \n");
 		for (int i = 0; i < NUM_B / (2 * factor); ++i)
 		{
@@ -165,7 +154,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 		}
 		printf("\n");
-		//debug/////////////////
+#endif
 
 		//setup input conf
 		for (int i = 0; i < NUM_B / (2 * factor); ++i)
@@ -175,11 +164,8 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			int row = i;
 			int pair = output[find(input, layerIN[2 * i + offset])];
 			int col = (find(layerOUT, pair) - offset) / 2;
-			int b1 = find(layerIN, layerIN[2 * i + offset]) % 2;
-			int b0 = find(layerOUT, pair) % 2;
-			int bin = (b1 << 1) + b0;
 
-			if (bin == table.get(row, col))
+			if (layerIN[(2 * i + offset)] == table.get(row, col))
 			{
 				if (AorB.get(row, col) == 0)
 				{
@@ -227,11 +213,8 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			int col = i;
 			int pair = input[find(output, layerOUT[2 * i + offset])];
 			int row = (find(layerIN, pair) - offset) / 2;
-			int b1 = find(layerIN, pair) % 2;
-			int b0 = find(layerOUT, layerOUT[2 * i + offset]) % 2;
-			int bin = (b1 << 1) + b0;
 
-			if (bin == table.get(row, col))
+			if (pair == table.get(row, col))
 			{
 				if (AorB.get(row, col) == 0)
 				{
@@ -271,7 +254,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 		}
 
-		//debug///////////////////
+#ifdef DEBUG
 		printf("conf table\n");
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
@@ -295,7 +278,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			std::cout << new_output[i] << " ";
 
 		printf("\n-----------------------------------------\n");
-		//////////////////////////////
+#endif
 	}
 
 	for (int i = 0; i < NUM_B; ++i)
@@ -306,6 +289,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		new_layerOUT[fix_connection.get(n, i)] = temp;
 	}
 
+#ifdef DEBUG
 	printf("\nnew final layer inputs: \n");
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerIN[i] << " ";
@@ -314,6 +298,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerOUT[i] << " ";
 	printf("\n\n");
+#endif
 
 	if (n + 1 == (WIDTH - 1) / 2)
 	{
@@ -339,7 +324,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 		}
 
-		//debug/////
+#ifdef RELEASE
 		printf("final conf table: \n");
 
 		for (int i = 0; i < HEIGHT; ++i)
@@ -347,11 +332,11 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			{
 				if (j == WIDTH-1)
 				{
-					printf("%d\n", conf[i][j]);
+					printf("%3d\n", conf[i][j]);
 				}
 				else
 				{
-					printf("%d ", conf[i][j]);
+					printf("%3d ", conf[i][j]);
 				}
 			}
 
@@ -364,9 +349,33 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << std::setw(2) << new_layerOUT[i] << " ";
 		printf("\n\n");
+#endif
 
+		return verification(last_layerIN, new_layerOUT);
+	}
+	else
+		return division_algo(new_layerIN, new_layerOUT, n + 1);
+}
+
+int verification(std::vector<int> in, std::vector<int> out)
+{
+	int tf = 1;
+	for (int i = 0; i < NUM_B; ++i)
+	{
+		int pair = output[find(input, in[i])];
+		if (out[i] != pair)
+		{
+			tf = 0;
+			printf("Cannot find the route\n");
+			break;
+		}
+	}
+
+	if (tf == 1)
+	{
+		printf("Find the route successfully\n");
 		return 0;
 	}
 	else
-		division_algo(new_layerIN, new_layerOUT, n + 1);
+		return 1;
 }

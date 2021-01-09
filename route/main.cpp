@@ -1,7 +1,6 @@
 #include <iostream>
 #include "global.h"
 #include "init.h"
-#include "fix_math.h"
 #include "algo.h"
 
 int main()
@@ -15,8 +14,10 @@ int main()
 	for (int i = 0; i < NUM_B; ++i)
 		printf("%d ", output[i]);
 	printf("\n--Division routing algorithm start--\n");
-	division_algo(input, input, 0);
 
 
-	return 0;
+	if (division_algo(input, input, 0) == 0)
+		return 0;
+	else
+		return 1;
 }

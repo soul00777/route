@@ -2,20 +2,6 @@
 #include "global.h"
 #include <iostream>
 
-//int find(Array arr, int key)
-//{
-//	int index = -1;
-//	for (int i = 0; i < arr._length; i++)
-//	{
-//		if (arr[i] == key)
-//		{
-//			index = i;
-//			break;
-//		}
-//	}
-//	return index;
-//}
-
 Matrix2d::Matrix2d()
 {
 	_height = 0;
@@ -65,13 +51,11 @@ void Matrix2d::init_fix_connection()
 				if (pos % 2 == 0)
 				{
 					_arr[index(i, pos)] = even_cnt + (y / ipow(2, i) * j);
-					//this->set(i, pos, even_cnt + (y / ipow(2, i) * j));
 					even_cnt++;
 				}
 				else
 				{
 					_arr[index(i, pos)] = odd_cnt + (y / ipow(2, i) * j);
-					//this->set(i, pos, odd_cnt + (y / ipow(2, i) * j));
 					odd_cnt++;
 				}
 				++pos;
@@ -121,30 +105,3 @@ int log2(int i)
 		while (i >>= 1) ++cnt;
 		return cnt;
 }
-
-//Array::Array()
-//{
-//	_length = 0;
-//	_arr = nullptr;
-//}
-//
-//Array::Array(int x)
-//{
-//	_length = x;
-//	_arr = new int[_length];
-//	for (int i = 0; i < x; ++i)
-//		_arr[i] = -1;
-//}
-//
-////Array::~Array()
-////{
-////	delete[] _arr;
-////}
-//
-//void Array::set_length(int x)
-//{
-//	_length = x;
-//	_arr = new int[_length];
-//	for (int i = 0; i < x; ++i)
-//		_arr[i] = -1;
-//}
