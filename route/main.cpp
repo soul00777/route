@@ -2,10 +2,12 @@
 #include "global.h"
 #include "init.h"
 #include "algo.h"
+#include "sim.h"
 
 int main()
 {
-	init_conf();
+	conv2d_1();
+	/*init_conf();
 	fix_connection.init_fix_connection();
 	printf("Input/Output\n");
 	for (int i = 0; i < NUM_B; ++i)
@@ -19,5 +21,5 @@ int main()
 	if (division_algo(input, input, 0) == 0)
 		return 0;
 	else
-		return 1;
+		return 1;*/
 }

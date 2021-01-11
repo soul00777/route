@@ -144,12 +144,14 @@
     <ClCompile Include="global.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="sim.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="algo.h" />
     <ClInclude Include="fix_math.h" />
     <ClInclude Include="global.h" />
     <ClInclude Include="init.h" />
+    <ClInclude Include="sim.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
