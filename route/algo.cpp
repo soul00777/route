@@ -3,8 +3,10 @@
 #include "fix_math.h"
 #include <iostream>
 #include <iomanip>
-//#define DEBUG
-//#define RELEASE
+#include <fstream>
+#include <string>
+#define DEBUG
+#define RELEASE
 
 int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 {
@@ -124,6 +126,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		}
 
 #ifdef DEBUG
+		printf("\nRanking table: \n");
 		for (int i = 0; i < NUM_B / (2 * factor); ++i)
 		{
 			for (int j = 0; j < NUM_B / (2 * factor); ++j)
@@ -255,7 +258,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		}
 
 #ifdef DEBUG
-		printf("conf table\n");
+		printf("Conf table\n");
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
 			{
@@ -269,15 +272,13 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 				}
 			}
 
-		printf("\nnew intermediate layer input:\n");
+		printf("\nNew layer inputs (before fixed connection):\n");
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << new_input[i] << " ";
 
-		printf("\nnew intermediate layer output:\n");
+		printf("\nNew layer outputs (before fixed connection):\n");
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << new_output[i] << " ";
-
-		printf("\n-----------------------------------------\n");
 #endif
 	}
 
@@ -290,17 +291,18 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 	}
 
 #ifdef DEBUG
-	printf("\nnew final layer inputs: \n");
+	printf("\nNew layer inputs (after fixed connection): \n");
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerIN[i] << " ";
-	printf("\nnew final layer outputs: \n");
+	printf("\nNew layer outputs (after fixed connection): \n");
 
 	for (int i = 0; i < NUM_B; ++i)
 		std::cout << new_layerOUT[i] << " ";
-	printf("\n\n");
+	printf("\n-----------------------------------------\n");
+	printf("\n");
 #endif
 
-	if (n + 1 == (WIDTH - 1) / 2)
+	if (n + 1 == (WIDTH - 1) / 2)								//last iteration
 	{
 		std::vector<int> last_layerIN(NUM_B, -1);
 		for (int i = 0; i < NUM_B / 2; ++i)
@@ -325,7 +327,7 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 		}
 
 #ifdef RELEASE
-		printf("final conf table: \n");
+		printf("Final conf table: \n");
 
 		for (int i = 0; i < HEIGHT; ++i)
 			for (int j = 0; j < WIDTH; ++j)
@@ -341,10 +343,10 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 			}
 
 		printf("\n\n");
-		printf("final input (middle layer): \n");
+		printf("Final input (middle layer): \n");
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << std::setw(2) << last_layerIN[i] << " ";
-		printf("\nfinal output (middle layer): \n");
+		printf("\nFinal output (middle layer): \n");
 
 		for (int i = 0; i < NUM_B; ++i)
 			std::cout << std::setw(2) << new_layerOUT[i] << " ";
@@ -359,11 +361,85 @@ int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
 
 int verification(std::vector<int> in, std::vector<int> out)
 {
+	int interlayer_IN[NUM_B][WIDTH];
+	int interlayer_OUT[NUM_B][WIDTH];
+	int new_fix_connection[WIDTH - 1][NUM_B];
+
+	for (int i = 0; i < (WIDTH - 1) / 2; ++i)
+	{
+		for (int j = 0; j < NUM_B; ++j)
+		{
+			new_fix_connection[i][j] = fix_connection.get(i, j);
+			new_fix_connection[WIDTH - 2 - i][fix_connection.get(i, j)] = j;
+		}
+	}
+
+	/*printf("\n");
+	for (int i = 0; i < WIDTH - 1; ++i)
+	{
+		for (int j = 0; j < NUM_B; ++j)
+		{
+			printf("%d ", new_fix_connection[i][j]);
+		}
+		printf("\n");
+	}*/
+
+	for (int i = 0; i < NUM_B; ++i)
+		interlayer_IN[i][0] = input[i];
+
+	for (int j = 0; j < HEIGHT; ++j)
+	{
+		if (conf[j][0] == 0)
+		{
+			interlayer_OUT[2 * j][0] = interlayer_IN[2 * j][0];
+			interlayer_OUT[2 * j + 1][0] = interlayer_IN[2 * j + 1][0];
+		}
+		else
+		{
+			interlayer_OUT[2 * j][0] = interlayer_IN[2 * j + 1][0];
+			interlayer_OUT[2 * j + 1][0] = interlayer_IN[2 * j][0];
+		}
+	}
+
+	for (int l = 1; l < WIDTH; ++l)
+	{
+		for (int i = 0; i < NUM_B; ++i)
+		{
+			interlayer_IN[new_fix_connection[l - 1][i]][l] = interlayer_OUT[i][l - 1];
+		}
+
+		for (int j = 0; j < HEIGHT; ++j)
+		{
+			if (conf[j][l] == 0)
+			{
+				interlayer_OUT[2 * j][l] = interlayer_IN[2 * j][l];
+				interlayer_OUT[2 * j + 1][l] = interlayer_IN[2 * j + 1][l];
+			}
+			else
+			{
+				interlayer_OUT[2 * j][l] = interlayer_IN[2 * j + 1][l];
+				interlayer_OUT[2 * j + 1][l] = interlayer_IN[2 * j][l];
+			}
+		}
+	}
+
+	printf("\n");
+	printf("\n");
+	for (int i = 0; i < WIDTH; ++i)
+	{
+		for (int j = 0; j < NUM_B; ++j)
+			printf("%d ", interlayer_IN[j][i]);
+		printf("\n");
+		for (int j = 0; j < NUM_B; ++j)
+			printf("%d ", interlayer_OUT[j][i]);
+		printf("\n");
+	}
+
 	int tf = 1;
 	for (int i = 0; i < NUM_B; ++i)
 	{
-		int pair = output[find(input, in[i])];
-		if (out[i] != pair)
+		int pair = output[find(input, interlayer_OUT[i][WIDTH - 1])];
+		if (pair != i)
 		{
 			tf = 0;
 			printf("Cannot find the route\n");
@@ -378,4 +454,45 @@ int verification(std::vector<int> in, std::vector<int> out)
 	}
 	else
 		return 1;
+}
+
+void output_coe()
+{
+	std::string path[19];
+	path[0] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram01.coe";
+	path[1] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram02.coe";
+	path[2] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram03.coe";
+	path[3] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram04.coe";
+	path[4] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram05.coe";
+	path[5] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram06.coe";
+	path[6] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram07.coe";
+	path[7] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram08.coe";
+	path[8] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram09.coe";
+	path[9] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram10.coe";
+	path[10] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram11.coe";
+	path[11] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram12.coe";
+	path[12] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram13.coe";
+	path[13] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram14.coe";
+	path[14] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram15.coe";
+	path[15] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram16.coe";
+	path[16] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram17.coe";
+	path[17] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram18.coe";
+	path[18] = "C:\\Users\\soul0\\source\\repos\\route\\output\\bram19.coe";
+	std::ofstream myfile;
+
+	for (int j = 0; j < WIDTH; ++j)
+	{
+		myfile.open(path[j]);
+		if (myfile.is_open())
+		{
+			myfile << "memory_initialization_radix=2;\n";
+			myfile << "memory_initialization_vector=\n";
+			for (int i = 0; i < HEIGHT; ++i)
+			{
+				myfile << conf[i][j];
+			}
+			myfile << ";";
+			myfile.close();
+		}
+	}
 }
