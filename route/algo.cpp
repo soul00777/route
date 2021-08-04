@@ -5,7 +5,7 @@
 #include <iomanip>
 #include <fstream>
 #include <string>
-#define DEBUG
+//#define DEBUG
 #define RELEASE
 
 int  division_algo(std::vector<int> layerIN, std::vector<int> layerOUT, int n)
